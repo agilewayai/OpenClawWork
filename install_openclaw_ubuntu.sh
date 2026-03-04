@@ -144,13 +144,14 @@ if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
 fi
 
 tmux new-session -d -s "$SESSION_NAME" -n configure "$CONFIG_SAFE_BIN; echo; exec bash"
-tmux split-window -h -t "$SESSION_NAME:configure.0" "$OPENCLAW_BIN gateway status --deep || true; echo; exec bash"
-tmux split-window -v -t "$SESSION_NAME:configure.1" "$OPENCLAW_BIN channels status --probe || true; echo; exec bash"
+MAIN_PANE="$(tmux display-message -p -t "$SESSION_NAME:configure" '#{pane_id}')"
+RIGHT_PANE="$(tmux split-window -h -P -F '#{pane_id}' -t "$MAIN_PANE" "$OPENCLAW_BIN gateway status --deep || true; echo; exec bash")"
+tmux split-window -v -t "$RIGHT_PANE" "$OPENCLAW_BIN channels status --probe || true; echo; exec bash"
 tmux select-layout -t "$SESSION_NAME:configure" tiled
 
 tmux new-window -t "$SESSION_NAME" -n logs "$OPENCLAW_BIN logs --follow --local-time || true; exec bash"
 tmux select-window -t "$SESSION_NAME:configure"
-tmux select-pane -t "$SESSION_NAME:configure.0"
+tmux select-pane -t "$MAIN_PANE"
 
 exec tmux attach -t "$SESSION_NAME"
 EOF
@@ -175,11 +176,12 @@ if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
 fi
 
 tmux new-session -d -s "$SESSION_NAME" -n ops "$OPENCLAW_BIN gateway status --deep || true; bash"
-tmux split-window -h -t "$SESSION_NAME:ops" "$OPENCLAW_BIN health --verbose || true; bash"
-tmux split-window -v -t "$SESSION_NAME:ops.1" "$OPENCLAW_BIN channels status --probe || true; bash"
-tmux split-window -v -t "$SESSION_NAME:ops.2" "$OPENCLAW_BIN logs --follow --local-time"
+MAIN_PANE="$(tmux display-message -p -t "$SESSION_NAME:ops" '#{pane_id}')"
+RIGHT_TOP_PANE="$(tmux split-window -h -P -F '#{pane_id}' -t "$MAIN_PANE" "$OPENCLAW_BIN health --verbose || true; bash")"
+RIGHT_MID_PANE="$(tmux split-window -v -P -F '#{pane_id}' -t "$RIGHT_TOP_PANE" "$OPENCLAW_BIN channels status --probe || true; bash")"
+tmux split-window -v -t "$RIGHT_MID_PANE" "$OPENCLAW_BIN logs --follow --local-time"
 tmux select-layout -t "$SESSION_NAME:ops" tiled
-tmux select-pane -t "$SESSION_NAME:ops.0"
+tmux select-pane -t "$MAIN_PANE"
 
 exec tmux attach -t "$SESSION_NAME"
 EOF
