@@ -97,12 +97,6 @@ systemctl --user is-enabled ... unavailable
 openclaw-config-safe
 ```
 
-需要 tmux 多窗格辅助时：
-
-```bash
-openclaw-config-tmux
-```
-
 必要时手工前台拉起 Gateway：
 
 ```bash
@@ -284,8 +278,6 @@ openclaw gateway start
 openclaw gateway stop
 openclaw gateway restart
 openclaw-config-safe
-openclaw-config-tmux
-openclaw-ops-tmux
 
 # 巡检
 openclaw status
