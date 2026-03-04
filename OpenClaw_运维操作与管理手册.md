@@ -64,6 +64,14 @@ openclaw gateway restart
 openclaw gateway stop
 ```
 
+先确认用户级 systemd 是否可用：
+
+```bash
+systemctl --user show-environment
+```
+
+若上面命令报错（例如 `Failed to connect to bus`），不要走 daemon 托管，改用 4.3 的 local 模式。
+
 Linux 用户级 systemd 服务常见补充操作：
 
 ```bash
@@ -74,6 +82,32 @@ sudo loginctl enable-linger <your-user>
 说明：
 - 如果使用 profile，服务名可能为 `openclaw-gateway-<profile>.service`
 - 为保证用户退出后服务仍常驻，需启用 `linger`
+
+### 4.3 无 user-systemd 环境（云主机/容器常见）
+
+当 `openclaw configure` 期间出现以下错误时，通常是 user-systemd 不可用：
+
+```text
+systemctl --user is-enabled ... unavailable
+```
+
+推荐使用安装脚本提供的安全配置命令：
+
+```bash
+openclaw-config-safe
+```
+
+需要 tmux 多窗格辅助时：
+
+```bash
+openclaw-config-tmux
+```
+
+必要时手工前台拉起 Gateway：
+
+```bash
+openclaw gateway --port 18789
+```
 
 ## 5. 日常运维 SOP
 
@@ -249,6 +283,9 @@ openclaw gateway status
 openclaw gateway start
 openclaw gateway stop
 openclaw gateway restart
+openclaw-config-safe
+openclaw-config-tmux
+openclaw-ops-tmux
 
 # 巡检
 openclaw status
